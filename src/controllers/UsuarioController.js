@@ -55,7 +55,6 @@ module.exports = {
         let senha = req.body.senha;
         let role = 'normal';
         let isactive = req.body.isActive;
-        console.log('chegou aqui');
         if (nome && cpf && email && senha && role) {
             let usuarioId = await UsuarioModel.add(nome, cpf, email, senha, role, isactive);
             json.result = {
@@ -67,6 +66,41 @@ module.exports = {
                 role,
                 isactive,
             };
+        } else {
+            json.error = 'Campos em branco!';
+        }
+
+        res.json(json);
+    },
+    update: async (req, res) => {
+        let json = { error: '', result: {} };
+
+        console.log('Chegou aqui');
+        console.log('Parâmetros recebidos:', {
+            id: req.params.id,
+            nome: req.body.nome,
+            cpf: req.body.cpf,
+            email: req.body.email,
+        });
+
+        let id = req.params.id;
+        let nome = req.body.nome;
+        let cpf = req.body.cpf;
+        let email = req.body.email;
+
+        if (id && nome && cpf && email !== undefined) {
+            let success = await UsuarioModel.updateById(id, nome, cpf, email, isactive);
+            if (success) {
+                json.result = {
+                    id,
+                    nome,
+                    cpf,
+                    email,
+                    isActive: isactive,
+                };
+            } else {
+                json.error = 'Não foi possível atualizar o usuário.';
+            }
         } else {
             json.error = 'Campos em branco!';
         }

@@ -43,9 +43,7 @@ module.exports = {
         });
     },
     add: (nome, cpf, email, senha, role, isactive) => {
-        console.log(nome, cpf, email, senha, role, isactive);
         return new Promise((resolve, reject) => {
-            console.log('chegou aqui 2');
             db.query(
                 'INSERT INTO usuarios (cpf, nome, email, senha, isActive, role) VALUES (?,?,?,?,?,?)',
                 [cpf, nome, email, senha, isactive, role],
@@ -57,6 +55,20 @@ module.exports = {
                     resolve(results.insertId);
                 }
             );
+        });
+    },
+    updateById: (id, nome, cpf, email, isactive) => {
+        console.log('Chegou aqui 2');
+        console.log('Parâmetros recebidos para updateById:', { id, nome, cpf, email, isactive });
+        return new Promise((resolve, reject) => {
+            db.query('UPDATE usuarios SET nome = ?, cpf = ?, email = ?, isActive = ? WHERE id = ?', [nome, cpf, email, isactive, id], (error, results) => {
+                if (error) {
+                    console.error('Erro ao executar query:', error);
+                    reject(error);
+                    return;
+                }
+                resolve(results.affectedRows > 0);
+            });
         });
     },
 };
