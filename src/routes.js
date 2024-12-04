@@ -7,6 +7,7 @@ const AlojamentoController = require('./controllers/AlojamentoController');
 const BiometriaController = require('./controllers/BiometriaController');
 const UsuarioController = require('./controllers/UsuarioController');
 const Logger = require('./controllers/LogController');
+const EnderecoController = require('./controllers/EnderecoController');
 
 router.get('/ping', UnidadeController.ping);
 
@@ -35,5 +36,8 @@ router.put('/biometria/:id', BiometriaController.edit);
 router.delete('/biometria/:id', BiometriaController.delete);
 
 router.post('/logs', Logger.add);
+
+router.post('/updateendereco', EnderecoController.updateOrCreateEndereco);
+router.get('/enderecos/:usuarioId', EnderecoController.findEndereco);
 
 module.exports = router;

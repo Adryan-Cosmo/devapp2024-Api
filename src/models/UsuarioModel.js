@@ -42,11 +42,11 @@ module.exports = {
             });
         });
     },
-    add: (nome, cpf, email, senha, role, isactive) => {
+    add: (nome, cpf, email, senha, role, isactive, dataCadastro) => {
         return new Promise((resolve, reject) => {
             db.query(
-                'INSERT INTO usuarios (cpf, nome, email, senha, isActive, role) VALUES (?,?,?,?,?,?)',
-                [cpf, nome, email, senha, isactive, role],
+                'INSERT INTO usuarios (cpf, nome, email, senha, isActive, role, dataCadastro) VALUES (?,?,?,?,?,?,?)',
+                [cpf, nome, email, senha, isactive, role, dataCadastro],
                 (error, results) => {
                     if (error) {
                         reject(error);
@@ -69,6 +69,22 @@ module.exports = {
                 }
                 resolve(results.affectedRows > 0);
             });
+        });
+    },
+    addHistorico: (usuarioId, campo, valorAntigo, valorNovo, dataAlteracao) => {
+        if (valorAntigo === valorNovo) return Promise.resolve(false);
+        return new Promise((resolve, reject) => {
+            db.query(
+                'INSERT INTO historico_alteracoes (usuarioId, campo, valorAntigo, valorNovo, dataAlteracao) VALUES (?,?,?,?,?)',
+                [usuarioId, campo, valorAntigo, valorNovo, dataAlteracao],
+                (error, results) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    resolve(results.insertId);
+                }
+            );
         });
     },
 };

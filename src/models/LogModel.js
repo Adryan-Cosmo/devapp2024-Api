@@ -1,11 +1,11 @@
 const db = require('../db');
 
 module.exports = {
-    addLog: (userId, userName, itemId, itemName, action, timestamp) => {
+    addLog: (userId, userName, itemId, itemName, action) => {
         return new Promise((resolve, reject) => {
             db.query(
-                'INSERT INTO logs (userId, userName, itemId, itemName, action, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
-                [userId, userName, itemId, itemName, action, timestamp],
+                'INSERT INTO logs (userId, userName, itemId, itemName, action) VALUES (?, ?, ?, ?, ?)',
+                [userId, userName, itemId, itemName, action],
                 (error, results) => {
                     if (error) {
                         reject(error);

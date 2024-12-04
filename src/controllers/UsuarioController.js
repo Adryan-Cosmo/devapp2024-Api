@@ -1,4 +1,5 @@
 const UsuarioModel = require('../models/UsuarioModel');
+const Logger = require('../models/LogModel');
 
 module.exports = {
     logar: async (req, res) => {
@@ -31,6 +32,7 @@ module.exports = {
                 senha: usuarios[i].senha,
                 isActive: usuarios[i].isActive,
                 role: usuarios[i].role,
+                dataCadastro: usuarios[i].dataCadastro,
             });
         }
         res.json(json);
@@ -55,8 +57,13 @@ module.exports = {
         let senha = req.body.senha;
         let role = 'normal';
         let isactive = req.body.isActive;
+        let dataCadastro = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
         if (nome && cpf && email && senha && role) {
-            let usuarioId = await UsuarioModel.add(nome, cpf, email, senha, role, isactive);
+            let usuarioId = await UsuarioModel.add(nome, cpf, email, senha, role, isactive, dataCadastro);
+
+            await Logger.addLog(usuarioId, nome, usuarioId, 'Novo Usuário', 'Cadastro realizado');
+
             json.result = {
                 id: usuarioId,
                 nome,
@@ -65,6 +72,7 @@ module.exports = {
                 senha,
                 role,
                 isactive,
+                dataCadastro,
             };
         } else {
             json.error = 'Campos em branco!';
@@ -75,22 +83,30 @@ module.exports = {
     update: async (req, res) => {
         let json = { error: '', result: {} };
 
-        console.log('Chegou aqui');
-        console.log('Parâmetros recebidos:', {
-            id: req.params.id,
-            nome: req.body.nome,
-            cpf: req.body.cpf,
-            email: req.body.email,
-        });
-
         let id = req.params.id;
         let nome = req.body.nome;
         let cpf = req.body.cpf;
         let email = req.body.email;
+        let isactive = req.body.isActive;
+        let usuario = await UsuarioModel.findById(id);
 
-        if (id && nome && cpf && email !== undefined) {
+        if (id && nome && cpf && email !== undefined && usuario) {
+            // Registro de histórico com validação adicional
+            const camposParaValidar = [
+                { campo: 'nome', valorAntigo: usuario.nome, valorNovo: nome },
+                { campo: 'cpf', valorAntigo: usuario.cpf, valorNovo: cpf },
+                { campo: 'email', valorAntigo: usuario.email, valorNovo: email },
+            ];
+
+            for (const { campo, valorAntigo, valorNovo } of camposParaValidar) {
+                if (valorAntigo !== valorNovo) {
+                    await UsuarioModel.addHistorico(id, campo, valorAntigo, valorNovo, new Date());
+                }
+            }
+
             let success = await UsuarioModel.updateById(id, nome, cpf, email, isactive);
             if (success) {
+                await Logger.addLog(id, nome, id, 'Atualização de Usuário', 'Dados atualizados');
                 json.result = {
                     id,
                     nome,
